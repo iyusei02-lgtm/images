@@ -1,201 +1,312 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Image Slider</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 20px;
-        font-family: Arial, sans-serif;
-      }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Slider</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-      .slider-container {
-        margin-bottom: 40px;
-      }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
 
-      .slider-title {
-        font-size: 20px;
-        font-weight: bold;
-        margin-bottom: 10px;
-      }
+    .slider-container {
+      max-width: 1200px;
+      margin: 0 auto 50px;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
 
-      .slider {
-        position: relative;
-        width: 100%;
-        max-width: 600px;
-        margin: 0 auto;
-        overflow: hidden;
-      }
+    .slider-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #333;
+    }
 
-      .slider-wrapper {
-        display: flex;
-        transition: transform 0.3s ease;
-      }
+    /* 가로 이미지 슬라이더 (Width) */
+    .width-slider .main-image-container {
+      position: relative;
+      width: 100%;
+      height: 400px;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
 
-      .slider-wrapper img {
-        width: 100%;
-        height: 400px;
-        object-fit: cover;
-        flex-shrink: 0;
-      }
+    .width-slider .main-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
 
-      .slider-button {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(0, 0, 0, 0.5);
-        color: white;
-        border: none;
-        padding: 15px 20px;
-        cursor: pointer;
-        font-size: 18px;
-        z-index: 10;
-      }
+    /* 세로 이미지 슬라이더 (Length) */
+    .length-slider .main-image-container {
+      position: relative;
+      width: 300px;
+      height: 500px;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 0 auto 20px;
+    }
 
-      .slider-button:hover {
-        background: rgba(0, 0, 0, 0.8);
-      }
+    .length-slider .main-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
 
-      .slider-button.prev {
-        left: 10px;
-      }
+    /* 화살표 버튼 */
+    .arrow-button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: all 0.3s;
+    }
 
-      .slider-button.next {
-        right: 10px;
-      }
+    .arrow-button:hover {
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
 
-      .slider-dots {
-        text-align: center;
-        margin-top: 10px;
-      }
+    .arrow-button.prev {
+      left: 15px;
+    }
 
-      .dot {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: #ccc;
-        margin: 0 5px;
-        cursor: pointer;
-      }
+    .arrow-button.next {
+      right: 15px;
+    }
 
-      .dot.active {
-        background: #333;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="slider-container">
-      <div class="slider-title">Width Images</div>
-      <div class="slider" id="width-slider">
-        <div class="slider-wrapper" id="width-wrapper"></div>
-        <button class="slider-button prev" onclick="moveSlide('width', -1)">
-          ❮
-        </button>
-        <button class="slider-button next" onclick="moveSlide('width', 1)">
-          ❯
-        </button>
-      </div>
-      <div class="slider-dots" id="width-dots"></div>
+    /* 썸네일 컨테이너 */
+    .thumbnails-container {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 10px 0;
+      scrollbar-width: thin;
+    }
+
+    .thumbnails-container::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .thumbnails-container::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+
+    .thumbnails-container::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 3px;
+    }
+
+    .thumbnails-container::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    /* 가로 슬라이더 썸네일 */
+    .width-slider .thumbnail {
+      width: 120px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 5px;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.3s;
+      flex-shrink: 0;
+    }
+
+    /* 세로 슬라이더 썸네일 */
+    .length-slider .thumbnail {
+      width: 60px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 5px;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.3s;
+      flex-shrink: 0;
+    }
+
+    .thumbnail:hover {
+      transform: scale(1.05);
+      border-color: #ddd;
+    }
+
+    .thumbnail.active {
+      border-color: #007bff;
+      box-shadow: 0 0 10px rgba(0,123,255,0.3);
+    }
+
+    /* 로딩 메시지 */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Width (가로) 이미지 슬라이더 -->
+  <div class="slider-container width-slider">
+    <div class="slider-title">Width Images (가로 이미지)</div>
+    <div class="main-image-container">
+      <img id="width-main-image" class="main-image" src="" alt="Main width image">
+      <button class="arrow-button prev" onclick="changeImage('width', -1)">‹</button>
+      <button class="arrow-button next" onclick="changeImage('width', 1)">›</button>
     </div>
+    <div class="thumbnails-container" id="width-thumbnails"></div>
+  </div>
 
-    <div class="slider-container">
-      <div class="slider-title">Length Images</div>
-      <div class="slider" id="length-slider">
-        <div class="slider-wrapper" id="length-wrapper"></div>
-        <button class="slider-button prev" onclick="moveSlide('length', -1)">
-          ❮
-        </button>
-        <button class="slider-button next" onclick="moveSlide('length', 1)">
-          ❯
-        </button>
-      </div>
-      <div class="slider-dots" id="length-dots"></div>
+  <!-- Length (세로) 이미지 슬라이더 -->
+  <div class="slider-container length-slider">
+    <div class="slider-title">Length Images (세로 이미지)</div>
+    <div class="main-image-container">
+      <img id="length-main-image" class="main-image" src="" alt="Main length image">
+      <button class="arrow-button prev" onclick="changeImage('length', -1)">‹</button>
+      <button class="arrow-button next" onclick="changeImage('length', 1)">›</button>
     </div>
+    <div class="thumbnails-container" id="length-thumbnails"></div>
+  </div>
 
-    <script>
-      const sliders = {
-        width: { currentIndex: 0, totalImages: 0 },
-        length: { currentIndex: 0, totalImages: 0 },
-      };
+  <script>
+    const sliders = {
+      width: { currentIndex: 0, images: [] },
+      length: { currentIndex: 0, images: [] }
+    };
 
-      function createSlider(type, imageUrls) {
-        const wrapper = document.getElementById(`${type}-wrapper`);
-        const dotsContainer = document.getElementById(`${type}-dots`);
-
-        sliders[type].totalImages = imageUrls.length;
-
-        // 이미지 추가
-        imageUrls.forEach((url, index) => {
-          const img = document.createElement("img");
-          img.src = url;
-          img.alt = `${type} image ${index + 1}`;
-          wrapper.appendChild(img);
-
-          // 도트 추가
-          const dot = document.createElement("span");
-          dot.className = `dot ${index === 0 ? "active" : ""}`;
-          dot.onclick = () => goToSlide(type, index);
-          dotsContainer.appendChild(dot);
-        });
+    function createSlider(type, imageUrls) {
+      if (!imageUrls || imageUrls.length === 0) {
+        document.querySelector(`.${type}-slider`).innerHTML = 
+          '<div class="loading">이미지가 없습니다.</div>';
+        return;
       }
 
-      function moveSlide(type, direction) {
-        const slider = sliders[type];
-        slider.currentIndex += direction;
+      sliders[type].images = imageUrls;
+      sliders[type].currentIndex = 0;
 
-        // 순환 처리
-        if (slider.currentIndex < 0) {
-          slider.currentIndex = slider.totalImages - 1;
-        } else if (slider.currentIndex >= slider.totalImages) {
-          slider.currentIndex = 0;
+      // 메인 이미지 설정
+      const mainImage = document.getElementById(`${type}-main-image`);
+      mainImage.src = imageUrls[0];
+
+      // 썸네일 생성
+      const thumbnailsContainer = document.getElementById(`${type}-thumbnails`);
+      thumbnailsContainer.innerHTML = '';
+
+      imageUrls.forEach((url, index) => {
+        const thumbnail = document.createElement('img');
+        thumbnail.src = url;
+        thumbnail.className = `thumbnail ${index === 0 ? 'active' : ''}`;
+        thumbnail.alt = `${type} thumbnail ${index + 1}`;
+        thumbnail.onclick = () => goToImage(type, index);
+        thumbnailsContainer.appendChild(thumbnail);
+      });
+    }
+
+    function changeImage(type, direction) {
+      const slider = sliders[type];
+      const totalImages = slider.images.length;
+
+      if (totalImages === 0) return;
+
+      slider.currentIndex += direction;
+
+      // 순환 처리
+      if (slider.currentIndex < 0) {
+        slider.currentIndex = totalImages - 1;
+      } else if (slider.currentIndex >= totalImages) {
+        slider.currentIndex = 0;
+      }
+
+      updateSlider(type);
+    }
+
+    function goToImage(type, index) {
+      sliders[type].currentIndex = index;
+      updateSlider(type);
+    }
+
+    function updateSlider(type) {
+      const slider = sliders[type];
+      const currentIndex = slider.currentIndex;
+      const currentImage = slider.images[currentIndex];
+
+      // 메인 이미지 업데이트
+      const mainImage = document.getElementById(`${type}-main-image`);
+      mainImage.src = currentImage;
+
+      // 썸네일 활성화 상태 업데이트
+      const thumbnails = document.querySelectorAll(`#${type}-thumbnails .thumbnail`);
+      thumbnails.forEach((thumbnail, index) => {
+        if (index === currentIndex) {
+          thumbnail.classList.add('active');
+          // 활성 썸네일이 보이도록 스크롤
+          thumbnail.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        } else {
+          thumbnail.classList.remove('active');
         }
+      });
+    }
 
-        updateSlider(type);
+    // Width 이미지 목록 로드
+    fetch("https://iyusei02-lgtm.github.io/images/width.json")
+      .then((response) => response.json())
+      .then((imageUrls) => {
+        console.log("Width images:", imageUrls);
+        createSlider('width', imageUrls);
+      })
+      .catch((error) => {
+        console.error("Error loading width images:", error);
+        document.querySelector('.width-slider').innerHTML = 
+          '<div class="loading">이미지를 불러오는 중 오류가 발생했습니다.</div>';
+      });
+
+    // Length 이미지 목록 로드
+    fetch("https://iyusei02-lgtm.github.io/images/length.json")
+      .then((response) => response.json())
+      .then((imageUrls) => {
+        console.log("Length images:", imageUrls);
+        createSlider('length', imageUrls);
+      })
+      .catch((error) => {
+        console.error("Error loading length images:", error);
+        document.querySelector('.length-slider').innerHTML = 
+          '<div class="loading">이미지를 불러오는 중 오류가 발생했습니다.</div>';
+      });
+
+    // 키보드 화살표 키로도 조작 가능
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        changeImage('width', -1);
+      } else if (e.key === 'ArrowRight') {
+        changeImage('width', 1);
       }
+    });
+  </script>
 
-      function goToSlide(type, index) {
-        sliders[type].currentIndex = index;
-        updateSlider(type);
-      }
-
-      function updateSlider(type) {
-        const wrapper = document.getElementById(`${type}-wrapper`);
-        const dots = document.querySelectorAll(`#${type}-dots .dot`);
-        const currentIndex = sliders[type].currentIndex;
-
-        // 슬라이더 이동
-        wrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
-
-        // 도트 업데이트
-        dots.forEach((dot, index) => {
-          dot.className = `dot ${index === currentIndex ? "active" : ""}`;
-        });
-      }
-
-      // width 이미지 목록
-      fetch("https://iyusei02-lgtm.github.io/images/width.json")
-        .then((response) => response.json())
-        .then((imageUrls) => {
-          console.log("Width images:", imageUrls);
-          if (imageUrls.length > 0) {
-            createSlider("width", imageUrls);
-          }
-        })
-        .catch((error) => console.error("Error loading width images:", error));
-
-      // length 이미지 목록
-      fetch("https://iyusei02-lgtm.github.io/images/length.json")
-        .then((response) => response.json())
-        .then((imageUrls) => {
-          console.log("Length images:", imageUrls);
-          if (imageUrls.length > 0) {
-            createSlider("length", imageUrls);
-          }
-        })
-        .catch((error) => console.error("Error loading length images:", error));
-    </script>
-  </body>
+</body>
 </html>
