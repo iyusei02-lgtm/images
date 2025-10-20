@@ -1,30 +1,41 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Image Gallery</title>
-</head>
-<body>
-  <h1>이미지 목록</h1>
-  <p><a href="images.json">images.json 보기</a></p>
-  
-  <div id="gallery"></div>
-  
-  <script>
-    fetch('images.json')
-      .then(response => response.json())
-      .then(imageUrls => {
-        console.log(imageUrls);
-        const gallery = document.getElementById('gallery');
-        imageUrls.forEach(url => {
-          const img = document.createElement('img');
-          img.src = url;
-          img.style.width = '200px';
-          img.style.margin = '10px';
-          gallery.appendChild(img);
-        });
-      })
-      .catch(error => console.error('Error:', error));
-  </script>
-</body>
-</html>
+<div name="main-image-container"></div>
+
+<script>
+  // width 이미지 목록
+  fetch("https://iyusei02-lgtm.github.io/images/width.json")
+    .then((response) => response.json())
+    .then((imageUrls) => {
+      console.log("Width images:", imageUrls);
+
+      const container = document.getElementsByName("main-image-container")[0];
+
+      imageUrls.forEach((url) => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "Width image";
+        img.style.width = "200px";
+        img.style.margin = "10px";
+        container.appendChild(img);
+      });
+    })
+    .catch((error) => console.error("Error loading width images:", error));
+
+  // length 이미지 목록
+  fetch("https://iyusei02-lgtm.github.io/images/length.json")
+    .then((response) => response.json())
+    .then((imageUrls) => {
+      console.log("Length images:", imageUrls);
+
+      const container = document.getElementsByName("main-image-container")[0];
+
+      imageUrls.forEach((url) => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.alt = "Length image";
+        img.style.width = "200px";
+        img.style.margin = "10px";
+        container.appendChild(img);
+      });
+    })
+    .catch((error) => console.error("Error loading length images:", error));
+</script>
