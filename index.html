@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Image Gallery</title>
+</head>
+<body>
+  <h1>이미지 목록</h1>
+  <p><a href="images.json">images.json 보기</a></p>
+  
+  <div id="gallery"></div>
+  
+  <script>
+    fetch('images.json')
+      .then(response => response.json())
+      .then(imageUrls => {
+        console.log(imageUrls);
+        const gallery = document.getElementById('gallery');
+        imageUrls.forEach(url => {
+          const img = document.createElement('img');
+          img.src = url;
+          img.style.width = '200px';
+          img.style.margin = '10px';
+          gallery.appendChild(img);
+        });
+      })
+      .catch(error => console.error('Error:', error));
+  </script>
+</body>
+</html>
