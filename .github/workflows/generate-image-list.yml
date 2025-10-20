@@ -3,7 +3,8 @@ name: Generate Image List
 on:
   push:
     paths:
-      - 'images/**'
+      - 'width/**'
+      - 'length/**'
   workflow_dispatch:
 
 permissions:
@@ -17,18 +18,33 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         
-      - name: Generate image list JSON with full URLs
+      - name: Generate width.json
         run: |
-          # username과 repo-name을 본인 것으로 변경하세요
           BASE_URL="https://iyusei02-lgtm.github.io/images"
           
-          find images -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.webp" \) | \
-          sed "s|^|${BASE_URL}/|" | \
-          jq -R -s -c 'split("\n")[:-1]' > images.json
+          if [ -d "width" ]; then
+            find width -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.webp" \) | \
+            sed "s|^|${BASE_URL}/|" | \
+            jq -R -s -c 'split("\n")[:-1]' > width.json
+          else
+            echo "[]" > width.json
+          fi
+          
+      - name: Generate length.json
+        run: |
+          BASE_URL="https://iyusei02-lgtm.github.io/images"
+          
+          if [ -d "length" ]; then
+            find length -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.webp" \) | \
+            sed "s|^|${BASE_URL}/|" | \
+            jq -R -s -c 'split("\n")[:-1]' > length.json
+          else
+            echo "[]" > length.json
+          fi
           
       - name: Commit and push if changed
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add images.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update image list [skip ci]" && git push)
+          git add width.json length.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update image lists [skip ci]" && git push)
