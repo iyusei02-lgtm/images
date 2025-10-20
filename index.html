@@ -14,6 +14,8 @@
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
+      background: transparent;
+      overflow-x: hidden;
     }
 
     .slider-container {
@@ -32,7 +34,6 @@
       color: #333;
     }
 
-    /* 가로 이미지 슬라이더 (Width) */
     .width-slider .main-image-container {
       position: relative;
       width: 100%;
@@ -49,7 +50,6 @@
       object-fit: contain;
     }
 
-    /* 세로 이미지 슬라이더 (Length) */
     .length-slider .main-image-container {
       position: relative;
       width: 300px;
@@ -66,7 +66,6 @@
       object-fit: contain;
     }
 
-    /* 화살표 버튼 */
     .arrow-button {
       position: absolute;
       top: 50%;
@@ -99,7 +98,6 @@
       right: 15px;
     }
 
-    /* 썸네일 컨테이너 */
     .thumbnails-container {
       display: flex;
       gap: 10px;
@@ -126,7 +124,6 @@
       background: #555;
     }
 
-    /* 가로 슬라이더 썸네일 */
     .width-slider .thumbnail {
       width: 120px;
       height: 80px;
@@ -138,7 +135,6 @@
       flex-shrink: 0;
     }
 
-    /* 세로 슬라이더 썸네일 */
     .length-slider .thumbnail {
       width: 60px;
       height: 100px;
@@ -160,7 +156,6 @@
       box-shadow: 0 0 10px rgba(0,123,255,0.3);
     }
 
-    /* 로딩 메시지 */
     .loading {
       text-align: center;
       padding: 40px;
@@ -170,9 +165,8 @@
 </head>
 <body>
 
-  <!-- Width (가로) 이미지 슬라이더 -->
   <div class="slider-container width-slider">
-    <div class="slider-title">Width Images (가로 이미지)</div>
+    <div class="slider-title">가로 이미지</div>
     <div class="main-image-container">
       <img id="width-main-image" class="main-image" src="" alt="Main width image">
       <button class="arrow-button prev" onclick="changeImage('width', -1)">‹</button>
@@ -181,9 +175,8 @@
     <div class="thumbnails-container" id="width-thumbnails"></div>
   </div>
 
-  <!-- Length (세로) 이미지 슬라이더 -->
   <div class="slider-container length-slider">
-    <div class="slider-title">Length Images (세로 이미지)</div>
+    <div class="slider-title">세로 이미지</div>
     <div class="main-image-container">
       <img id="length-main-image" class="main-image" src="" alt="Main length image">
       <button class="arrow-button prev" onclick="changeImage('length', -1)">‹</button>
@@ -202,17 +195,16 @@
       if (!imageUrls || imageUrls.length === 0) {
         document.querySelector(`.${type}-slider`).innerHTML = 
           '<div class="loading">이미지가 없습니다.</div>';
+        sendHeight();
         return;
       }
 
       sliders[type].images = imageUrls;
       sliders[type].currentIndex = 0;
 
-      // 메인 이미지 설정
       const mainImage = document.getElementById(`${type}-main-image`);
       mainImage.src = imageUrls[0];
 
-      // 썸네일 생성
       const thumbnailsContainer = document.getElementById(`${type}-thumbnails`);
       thumbnailsContainer.innerHTML = '';
 
@@ -224,6 +216,8 @@
         thumbnail.onclick = () => goToImage(type, index);
         thumbnailsContainer.appendChild(thumbnail);
       });
+
+      mainImage.onload = () => sendHeight();
     }
 
     function changeImage(type, direction) {
@@ -234,7 +228,6 @@
 
       slider.currentIndex += direction;
 
-      // 순환 처리
       if (slider.currentIndex < 0) {
         slider.currentIndex = totalImages - 1;
       } else if (slider.currentIndex >= totalImages) {
@@ -254,16 +247,13 @@
       const currentIndex = slider.currentIndex;
       const currentImage = slider.images[currentIndex];
 
-      // 메인 이미지 업데이트
       const mainImage = document.getElementById(`${type}-main-image`);
       mainImage.src = currentImage;
 
-      // 썸네일 활성화 상태 업데이트
       const thumbnails = document.querySelectorAll(`#${type}-thumbnails .thumbnail`);
       thumbnails.forEach((thumbnail, index) => {
         if (index === currentIndex) {
           thumbnail.classList.add('active');
-          // 활성 썸네일이 보이도록 스크롤
           thumbnail.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         } else {
           thumbnail.classList.remove('active');
@@ -271,7 +261,11 @@
       });
     }
 
-    // Width 이미지 목록 로드
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      window.parent.postMessage({ height: height }, '*');
+    }
+
     fetch("https://iyusei02-lgtm.github.io/images/width.json")
       .then((response) => response.json())
       .then((imageUrls) => {
@@ -282,9 +276,9 @@
         console.error("Error loading width images:", error);
         document.querySelector('.width-slider').innerHTML = 
           '<div class="loading">이미지를 불러오는 중 오류가 발생했습니다.</div>';
+        sendHeight();
       });
 
-    // Length 이미지 목록 로드
     fetch("https://iyusei02-lgtm.github.io/images/length.json")
       .then((response) => response.json())
       .then((imageUrls) => {
@@ -295,9 +289,9 @@
         console.error("Error loading length images:", error);
         document.querySelector('.length-slider').innerHTML = 
           '<div class="loading">이미지를 불러오는 중 오류가 발생했습니다.</div>';
+        sendHeight();
       });
 
-    // 키보드 화살표 키로도 조작 가능
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft') {
         changeImage('width', -1);
@@ -305,6 +299,9 @@
         changeImage('width', 1);
       }
     });
+
+    window.addEventListener('resize', sendHeight);
+    window.addEventListener('load', sendHeight);
   </script>
 
 </body>
