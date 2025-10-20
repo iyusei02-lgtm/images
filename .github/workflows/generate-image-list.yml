@@ -1,4 +1,4 @@
-name: Generate Image List
+name: Generate Image List and Optimize
 
 on:
   push:
@@ -11,19 +11,60 @@ permissions:
   contents: write
 
 jobs:
-  generate-list:
+  optimize-and-generate:
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         
+      - name: Install ImageMagick and WebP tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick webp
+          
+      - name: Optimize and convert images to WebP
+        run: |
+          # width 폴더 처리 (가로 이미지 - 최대 폭 1200px)
+          if [ -d "width" ]; then
+            find width -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" \) | while read file; do
+              filename="${file%.*}"
+              
+              # ImageMagick으로 크기 조절 후 WebP 변환
+              convert "$file" -resize '1200x>' -quality 85 "${filename}_temp.png"
+              cwebp -q 85 "${filename}_temp.png" -o "${filename}.webp"
+              
+              # 임시 파일 및 원본 삭제
+              rm "${filename}_temp.png"
+              rm "$file"
+              
+              echo "Optimized: $file -> ${filename}.webp"
+            done
+          fi
+          
+          # length 폴더 처리 (세로 이미지 - 최대 높이 1600px)
+          if [ -d "length" ]; then
+            find length -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" \) | while read file; do
+              filename="${file%.*}"
+              
+              # ImageMagick으로 크기 조절 후 WebP 변환
+              convert "$file" -resize 'x1600>' -quality 85 "${filename}_temp.png"
+              cwebp -q 85 "${filename}_temp.png" -o "${filename}.webp"
+              
+              # 임시 파일 및 원본 삭제
+              rm "${filename}_temp.png"
+              rm "$file"
+              
+              echo "Optimized: $file -> ${filename}.webp"
+            done
+          fi
+          
       - name: Generate width.json
         run: |
           BASE_URL="https://iyusei02-lgtm.github.io/images"
           
           if [ -d "width" ]; then
-            find width -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.webp" \) | \
+            find width -type f -iname "*.webp" | \
             sed "s|^|${BASE_URL}/|" | \
             jq -R -s -c 'split("\n")[:-1]' > width.json
           else
@@ -35,7 +76,7 @@ jobs:
           BASE_URL="https://iyusei02-lgtm.github.io/images"
           
           if [ -d "length" ]; then
-            find length -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.webp" \) | \
+            find length -type f -iname "*.webp" | \
             sed "s|^|${BASE_URL}/|" | \
             jq -R -s -c 'split("\n")[:-1]' > length.json
           else
@@ -46,5 +87,5 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add width.json length.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update image lists [skip ci]" && git push)
+          git add .
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Optimize images to WebP and update lists [skip ci]" && git push)
