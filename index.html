@@ -47,6 +47,15 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    .width-slider .main-image.active {
+      opacity: 1;
     }
 
     .length-slider .main-image-container {
@@ -62,6 +71,15 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    .length-slider .main-image.active {
+      opacity: 1;
     }
 
     .arrow-button {
@@ -164,8 +182,7 @@
 <body>
 
   <div class="slider-container width-slider">
-    <div class="main-image-container">
-      <img id="width-main-image" class="main-image" src="" alt="Main width image">
+    <div class="main-image-container" id="width-image-container">
       <button class="arrow-button prev" onclick="changeImage('width', -1)">‹</button>
       <button class="arrow-button next" onclick="changeImage('width', 1)">›</button>
     </div>
@@ -173,8 +190,7 @@
   </div>
 
   <div class="slider-container length-slider">
-    <div class="main-image-container">
-      <img id="length-main-image" class="main-image" src="" alt="Main length image">
+    <div class="main-image-container" id="length-image-container">
       <button class="arrow-button prev" onclick="changeImage('length', -1)">‹</button>
       <button class="arrow-button next" onclick="changeImage('length', 1)">›</button>
     </div>
@@ -198,8 +214,21 @@
       sliders[type].images = imageUrls;
       sliders[type].currentIndex = 0;
 
-      const mainImage = document.getElementById(`${type}-main-image`);
-      mainImage.src = imageUrls[0];
+      const imageContainer = document.getElementById(`${type}-image-container`);
+      const arrows = imageContainer.querySelectorAll('.arrow-button');
+      imageContainer.innerHTML = '';
+      
+      // 모든 이미지를 미리 생성
+      imageUrls.forEach((url, index) => {
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = `main-image ${index === 0 ? 'active' : ''}`;
+        img.alt = `${type} image ${index + 1}`;
+        imageContainer.appendChild(img);
+      });
+
+      // 화살표 버튼 다시 추가
+      arrows.forEach(arrow => imageContainer.appendChild(arrow));
 
       const thumbnailsContainer = document.getElementById(`${type}-thumbnails`);
       thumbnailsContainer.innerHTML = '';
@@ -213,7 +242,11 @@
         thumbnailsContainer.appendChild(thumbnail);
       });
 
-      mainImage.onload = () => sendHeight();
+      // 첫 이미지 로드 후 높이 전송
+      const firstImage = imageContainer.querySelector('.main-image');
+      if (firstImage) {
+        firstImage.onload = () => sendHeight();
+      }
     }
 
     function changeImage(type, direction) {
@@ -241,11 +274,18 @@
     function updateSlider(type) {
       const slider = sliders[type];
       const currentIndex = slider.currentIndex;
-      const currentImage = slider.images[currentIndex];
 
-      const mainImage = document.getElementById(`${type}-main-image`);
-      mainImage.src = currentImage;
+      // 모든 메인 이미지에서 active 클래스 제거하고 현재 이미지에만 추가
+      const mainImages = document.querySelectorAll(`#${type}-image-container .main-image`);
+      mainImages.forEach((img, index) => {
+        if (index === currentIndex) {
+          img.classList.add('active');
+        } else {
+          img.classList.remove('active');
+        }
+      });
 
+      // 썸네일 업데이트
       const thumbnails = document.querySelectorAll(`#${type}-thumbnails .thumbnail`);
       thumbnails.forEach((thumbnail, index) => {
         if (index === currentIndex) {
