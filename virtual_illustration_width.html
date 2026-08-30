@@ -19,8 +19,8 @@
 
   <div class="slider-container width-slider">
     <div class="slider-wrapper">
-      <button type="button" class="arrow-button prev" onclick="event.preventDefault(); changeImage('width', -1)">‹</button>
-      <button type="button" class="arrow-button next" onclick="event.preventDefault(); changeImage('width', 1)">›</button>
+      <button type="button" class="arrow-button prev" onclick="changeImage('width', -1)">‹</button>
+      <button type="button" class="arrow-button next" onclick="changeImage('width', 1)">›</button>
       <div class="main-image-container" id="width-image-container">
       </div>
     </div>
@@ -59,10 +59,9 @@
         thumbnail.src = url;
         thumbnail.className = `thumbnail ${isActive}`;
         thumbnail.alt = `${type} thumbnail ${index + 1}`;
-        thumbnail.onclick = (e) => {
-          e.preventDefault();
-          goToImage(type, index);
-        };
+        
+        thumbnail.onclick = () => goToImage(type, index);
+        
         thumbnailsContainer.appendChild(thumbnail);
       });
     
@@ -107,16 +106,14 @@
     function updateSlider(type) {
       const currentIndex = sliders[type].currentIndex;
     
+      // 메인 이미지 활성화
       document.querySelectorAll(`#${type}-image-container .main-image`).forEach((img, index) => {
         img.classList.toggle('active', index === currentIndex);
       });
     
+      // 썸네일 활성화 (스크롤 자동 이동 삭제)
       document.querySelectorAll(`#${type}-thumbnails .thumbnail`).forEach((thumbnail, index) => {
-        const isActive = index === currentIndex;
-        thumbnail.classList.toggle('active', isActive);
-        if (isActive) {
-          thumbnail.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        }
+        thumbnail.classList.toggle('active', index === currentIndex);
       });
     }
     
