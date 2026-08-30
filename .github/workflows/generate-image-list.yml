@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'img/width/**'
-      - 'img/length/**'
+      - 'img/height/**'
       - 'img/virtual_illustration_width/**'
       - 'img/virtual_illustration_height/**'
   workflow_dispatch:
@@ -39,8 +39,8 @@ jobs:
             fi
           done
           
-          # 세로 이미지 처리 (최대 높이 1600px)
-          for DIR in "img/length" "img/virtual_illustration_height"; do
+          # 세로 이미지 처리 (최대 높이 1600px) - length를 height로 수정
+          for DIR in "img/height" "img/virtual_illustration_height"; do
             if [ -d "$DIR" ]; then
               find "$DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" \) | while read file; do
                 filename="${file%.*}"
@@ -53,18 +53,14 @@ jobs:
           
       - name: Generate JSON lists
         run: |
-          # 레포지토리 이름(images)을 포함한 베이스 URL
           BASE_URL="https://iyusei02-lgtm.github.io/images"
           
-          # 레포지토리 최상단에 data 폴더 생성
           mkdir -p data
           
-          for DIR in "img/width" "img/length" "img/virtual_illustration_width" "img/virtual_illustration_height"; do
-            # data/ 폴더 아래에 json 저장
+          for DIR in "img/width" "img/height" "img/virtual_illustration_width" "img/virtual_illustration_height"; do
             JSON_NAME="data/$(basename $DIR).json"
             
             if [ -d "$DIR" ]; then
-              # 최종 URL 예시: https://iyusei02-lgtm.github.io/images/img/width/...
               find "$DIR" -type f -iname "*.webp" | \
               sed "s|^|${BASE_URL}/|" | \
               jq -R -s -c 'split("\n")[:-1]' > "$JSON_NAME"
