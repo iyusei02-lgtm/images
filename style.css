@@ -58,11 +58,10 @@ body {
   opacity: 1;
 }
 
-/* length -> height 로 수정됨 */
 .height-slider .main-image-container {
   position: relative;
   width: 100%;
-  max-width: 450px;
+  /* max-width: 450px; */
   aspect-ratio: 9 / 16;
   border-radius: 8px;
   overflow: hidden;
