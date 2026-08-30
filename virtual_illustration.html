@@ -5,6 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Image Slider</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* 메인 이미지 비율 유지 및 잘림 방지 */
+    .width-slider .main-image,
+    .length-slider .main-image {
+      object-fit: contain !important;
+    }
+
+    /* 썸네일 비율 유지 및 잘림 방지 (빈 공간을 위한 옅은 배경색 추가) */
+    .width-slider .thumbnail,
+    .length-slider .thumbnail {
+      object-fit: contain !important;
+      background-color: #f8f9fa !important; 
+  }
+</style>
 </head>
 <body>
 
