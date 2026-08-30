@@ -43,7 +43,7 @@
   <script>
     const sliders = {
       width: { currentIndex: 0, images: [] },
-      height: { currentIndex: 0, images: [] } // length를 height로 수정
+      height: { currentIndex: 0, images: [] }
     };
     
     function createSlider(type, imageUrls) {
@@ -135,8 +135,8 @@
       window.parent.postMessage({ height: document.body.scrollHeight }, '*');
     }
     
-    function initSliderData(type) {
-      fetch(`https://iyusei02-lgtm.github.io/images/data/${type}.json`)
+    function initSliderData(type, fileName) {
+      fetch(`https://iyusei02-lgtm.github.io/images/data/${fileName}.json`)
         .then(res => res.json())
         .then(imageUrls => {
           imageUrls.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
@@ -149,7 +149,8 @@
         });
     }
     
-    ['virtual_illustration_width', 'virtual_illustration_height'].forEach(initSliderData);
+    initSliderData('width', 'virtual_illustration_width');
+    initSliderData('height', 'virtual_illustration_height');
     
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft') changeImage('width', -1);
