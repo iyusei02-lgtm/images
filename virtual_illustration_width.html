@@ -3,32 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Image Slider</title>
+  <title>Width Image Slider</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    .width-slider .main-image,
-    .height-slider .main-image {
+    .width-slider .main-image {
       object-fit: contain !important;
     }
-
-    .width-slider .thumbnail,
-    .height-slider .thumbnail {
+    .width-slider .thumbnail {
       object-fit: contain !important;
       background-color: #f8f9fa !important; 
-  }
-</style>
+    }
+  </style>
 </head>
 <body>
-
-  <div class="slider-container height-slider">
-    <div class="slider-wrapper">
-      <button class="arrow-button prev" onclick="changeImage('height', -1)">‹</button>
-      <button class="arrow-button next" onclick="changeImage('height', 1)">›</button>
-      <div class="main-image-container" id="height-image-container">
-      </div>
-    </div>
-    <div class="thumbnails-container" id="height-thumbnails"></div>
-  </div>
 
   <div class="slider-container width-slider">
     <div class="slider-wrapper">
@@ -42,8 +29,7 @@
   
   <script>
     const sliders = {
-      width: { currentIndex: 0, images: [] },
-      height: { currentIndex: 0, images: [] }
+      width: { currentIndex: 0, images: [] }
     };
     
     function createSlider(type, imageUrls) {
@@ -150,7 +136,6 @@
     }
     
     initSliderData('width', 'virtual_illustration_width');
-    initSliderData('height', 'virtual_illustration_height');
     
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft') changeImage('width', -1);
