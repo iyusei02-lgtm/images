@@ -126,7 +126,7 @@
     }
     
     function initSliderData(type) {
-      fetch(`https://iyusei02-lgtm.github.io/images/${type}.json`)
+      fetch(`https://iyusei02-lgtm.github.io/images/data/${type}.json`)
         .then(res => res.json())
         .then(imageUrls => {
           imageUrls.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));

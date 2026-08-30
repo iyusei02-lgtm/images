@@ -3,8 +3,10 @@ name: Generate Image List and Optimize
 on:
   push:
     paths:
-      - 'width/**'
-      - 'length/**'
+      - 'img/width/**'
+      - 'img/length/**'
+      - 'img/virtual_illustration_width/**'
+      - 'img/virtual_illustration_height/**'
   workflow_dispatch:
 
 permissions:
@@ -18,74 +20,62 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         
-      - name: Install ImageMagick and WebP tools
+      - name: Install ImageMagick, WebP, and jq
         run: |
           sudo apt-get update
-          sudo apt-get install -y imagemagick webp
+          sudo apt-get install -y imagemagick webp jq
           
       - name: Optimize and convert images to WebP
         run: |
-          # width 폴더 처리 (가로 이미지 - 최대 폭 1200px)
-          if [ -d "width" ]; then
-            find width -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" \) | while read file; do
-              filename="${file%.*}"
-              
-              # ImageMagick으로 크기 조절 후 WebP 변환
-              convert "$file" -resize '1200x>' -quality 85 "${filename}_temp.png"
-              cwebp -q 85 "${filename}_temp.png" -o "${filename}.webp"
-              
-              # 임시 파일 및 원본 삭제
-              rm "${filename}_temp.png"
-              rm "$file"
-              
-              echo "Optimized: $file -> ${filename}.webp"
-            done
-          fi
+          # 가로 이미지 처리 (최대 폭 1200px)
+          for DIR in "img/width" "img/virtual_illustration_width"; do
+            if [ -d "$DIR" ]; then
+              find "$DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" \) | while read file; do
+                filename="${file%.*}"
+                convert "$file" -resize '1200x>' -quality 85 "${filename}_temp.png"
+                cwebp -q 85 "${filename}_temp.png" -o "${filename}.webp"
+                rm "${filename}_temp.png" "$file"
+              done
+            fi
+          done
           
-          # length 폴더 처리 (세로 이미지 - 최대 높이 1600px)
-          if [ -d "length" ]; then
-            find length -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" \) | while read file; do
-              filename="${file%.*}"
-              
-              # ImageMagick으로 크기 조절 후 WebP 변환
-              convert "$file" -resize 'x1600>' -quality 85 "${filename}_temp.png"
-              cwebp -q 85 "${filename}_temp.png" -o "${filename}.webp"
-              
-              # 임시 파일 및 원본 삭제
-              rm "${filename}_temp.png"
-              rm "$file"
-              
-              echo "Optimized: $file -> ${filename}.webp"
-            done
-          fi
+          # 세로 이미지 처리 (최대 높이 1600px)
+          for DIR in "img/length" "img/virtual_illustration_height"; do
+            if [ -d "$DIR" ]; then
+              find "$DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" \) | while read file; do
+                filename="${file%.*}"
+                convert "$file" -resize 'x1600>' -quality 85 "${filename}_temp.png"
+                cwebp -q 85 "${filename}_temp.png" -o "${filename}.webp"
+                rm "${filename}_temp.png" "$file"
+              done
+            fi
+          done
           
-      - name: Generate width.json
+      - name: Generate JSON lists
         run: |
+          # 레포지토리 이름(images)을 포함한 베이스 URL
           BASE_URL="https://iyusei02-lgtm.github.io/images"
           
-          if [ -d "width" ]; then
-            find width -type f -iname "*.webp" | \
-            sed "s|^|${BASE_URL}/|" | \
-            jq -R -s -c 'split("\n")[:-1]' > width.json
-          else
-            echo "[]" > width.json
-          fi
+          # 레포지토리 최상단에 data 폴더 생성
+          mkdir -p data
           
-      - name: Generate length.json
-        run: |
-          BASE_URL="https://iyusei02-lgtm.github.io/images"
-          
-          if [ -d "length" ]; then
-            find length -type f -iname "*.webp" | \
-            sed "s|^|${BASE_URL}/|" | \
-            jq -R -s -c 'split("\n")[:-1]' > length.json
-          else
-            echo "[]" > length.json
-          fi
+          for DIR in "img/width" "img/length" "img/virtual_illustration_width" "img/virtual_illustration_height"; do
+            # data/ 폴더 아래에 json 저장
+            JSON_NAME="data/$(basename $DIR).json"
+            
+            if [ -d "$DIR" ]; then
+              # 최종 URL 예시: https://iyusei02-lgtm.github.io/images/img/width/...
+              find "$DIR" -type f -iname "*.webp" | \
+              sed "s|^|${BASE_URL}/|" | \
+              jq -R -s -c 'split("\n")[:-1]' > "$JSON_NAME"
+            else
+              echo "[]" > "$JSON_NAME"
+            fi
+          done
           
       - name: Commit and push if changed
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add .
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Optimize images to WebP and update lists [skip ci]" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Optimize images and update json in data folder [skip ci]" && git push)
