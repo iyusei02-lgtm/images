@@ -32,57 +32,33 @@ body {
   color: #333;
 }
 
-.width-slider .main-image-container {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: 8px;
-  overflow: hidden;
-  margin-bottom: 20px;
-  touch-action: pan-y;
-}
-
-.width-slider .main-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  position: absolute;
-  top: 0;
-  left: 0;
-  opacity: 0;
-  transition: opacity 0.5s ease-in-out;
-}
-
-.width-slider .main-image.active {
-  opacity: 1;
-}
-
+/* 컨테이너: 고정 비율 제거 및 CSS Grid 적용 */
+.width-slider .main-image-container,
 .height-slider .main-image-container {
-  position: relative;
+  display: grid;
   width: 100%;
-  /* max-width: 450px; */
-  aspect-ratio: 9 / 16;
+  max-width: 100%;
   border-radius: 8px;
   overflow: hidden;
   margin: 0 auto 20px;
   touch-action: pan-y;
 }
 
+/* 메인 이미지: absolute 제거, 높이 자동화, 한 Grid 칸에 모두 겹치기 */
+.width-slider .main-image,
 .height-slider .main-image {
+  grid-area: 1 / 1;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  position: absolute;
-  top: 0;
-  left: 0;
+  height: auto; 
+  object-fit: contain; 
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
 }
 
+.width-slider .main-image.active,
 .height-slider .main-image.active {
   opacity: 1;
+  z-index: 1;
 }
 
 .arrow-button {
@@ -143,10 +119,12 @@ body {
   background: #555;
 }
 
+/* 가로형 썸네일 */
 .width-slider .thumbnail {
   width: 120px;
   height: 80px;
-  object-fit: cover;
+  object-fit: contain;
+  background-color: #f8f9fa;
   border-radius: 5px;
   cursor: pointer;
   border: 3px solid transparent;
@@ -154,10 +132,12 @@ body {
   flex-shrink: 0;
 }
 
+/* 세로형 썸네일 */
 .height-slider .thumbnail {
   width: 60px;
   height: 100px;
-  object-fit: cover;
+  object-fit: contain;
+  background-color: #f8f9fa;
   border-radius: 5px;
   cursor: pointer;
   border: 3px solid transparent;
@@ -216,10 +196,6 @@ body {
     width: 50px;
     height: 83px;
   }
-
-  .height-slider .main-image-container {
-    max-width: 100%;
-  }
 }
 
 /* 작은 모바일 최적화 (480px 이하) */
@@ -256,10 +232,6 @@ body {
   .height-slider .thumbnail {
     width: 45px;
     height: 75px;
-  }
-
-  .height-slider .main-image-container {
-    max-width: 100%;
   }
 
   .thumbnails-container {
