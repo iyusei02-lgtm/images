@@ -6,15 +6,13 @@
   <title>Image Slider</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* 메인 이미지 비율 유지 및 잘림 방지 */
     .width-slider .main-image,
-    .length-slider .main-image {
+    .height-slider .main-image {
       object-fit: contain !important;
     }
 
-    /* 썸네일 비율 유지 및 잘림 방지 (빈 공간을 위한 옅은 배경색 추가) */
     .width-slider .thumbnail,
-    .length-slider .thumbnail {
+    .height-slider .thumbnail {
       object-fit: contain !important;
       background-color: #f8f9fa !important; 
   }
@@ -22,17 +20,16 @@
 </head>
 <body>
 
-  <!-- 스타일 유지를 위해 클래스와 ID는 length, width로 고정 -->
-  <div class="slider-container length-slider">
+  <div class="slider-container width-slider">
     <div class="slider-wrapper">
-      <button class="arrow-button prev" onclick="changeImage('length', -1)">‹</button>
-      <button class="arrow-button next" onclick="changeImage('length', 1)">›</button>
-      <div class="main-image-container" id="length-image-container">
+      <button class="arrow-button prev" onclick="changeImage('width', -1)">‹</button>
+      <button class="arrow-button next" onclick="changeImage('width', 1)">›</button>
+      <div class="main-image-container" id="width-image-container">
       </div>
     </div>
-    <div class="thumbnails-container" id="length-thumbnails"></div>
+    <div class="thumbnails-container" id="width-thumbnails"></div>
   </div>
-  
+
   <div class="slider-container height-slider">
     <div class="slider-wrapper">
       <button class="arrow-button prev" onclick="changeImage('height', -1)">‹</button>
@@ -46,7 +43,7 @@
   <script>
     const sliders = {
       width: { currentIndex: 0, images: [] },
-      length: { currentIndex: 0, images: [] }
+      height: { currentIndex: 0, images: [] } // length를 height로 수정
     };
     
     function createSlider(type, imageUrls) {
@@ -138,9 +135,8 @@
       window.parent.postMessage({ height: document.body.scrollHeight }, '*');
     }
     
-    // type(클래스/변수명)과 fileName(데이터 경로명)을 분리해서 받도록 수정
-    function initSliderData(type, fileName) {
-      fetch(`https://iyusei02-lgtm.github.io/images/data/${fileName}.json`)
+    function initSliderData(type) {
+      fetch(`https://iyusei02-lgtm.github.io/images/data/${type}.json`)
         .then(res => res.json())
         .then(imageUrls => {
           imageUrls.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
@@ -153,9 +149,7 @@
         });
     }
     
-    // UI 타입(width, length)에 맞게 각각 다른 JSON 파일을 맵핑하여 호출
-    initSliderData('width', 'virtual_illustration_width');
-    initSliderData('length', 'virtual_illustration_height');
+    ['virtual_illustration_width', 'virtual_illustration_height'].forEach(initSliderData);
     
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft') changeImage('width', -1);
