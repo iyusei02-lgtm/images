@@ -18,20 +18,21 @@
     <div class="thumbnails-container" id="width-thumbnails"></div>
   </div>
 
-  <div class="slider-container length-slider">
+  <!-- length를 height로 수정 -->
+  <div class="slider-container height-slider">
     <div class="slider-wrapper">
-      <button class="arrow-button prev" onclick="changeImage('length', -1)">‹</button>
-      <button class="arrow-button next" onclick="changeImage('length', 1)">›</button>
-      <div class="main-image-container" id="length-image-container">
+      <button class="arrow-button prev" onclick="changeImage('height', -1)">‹</button>
+      <button class="arrow-button next" onclick="changeImage('height', 1)">›</button>
+      <div class="main-image-container" id="height-image-container">
       </div>
     </div>
-    <div class="thumbnails-container" id="length-thumbnails"></div>
+    <div class="thumbnails-container" id="height-thumbnails"></div>
   </div>
   
   <script>
     const sliders = {
       width: { currentIndex: 0, images: [] },
-      length: { currentIndex: 0, images: [] }
+      height: { currentIndex: 0, images: [] } // length를 height로 수정
     };
     
     function createSlider(type, imageUrls) {
@@ -94,7 +95,6 @@
       const total = slider.images.length;
       if (!total) return;
     
-      // 나머지 연산을 활용한 간결한 인덱스 순환
       slider.currentIndex = (slider.currentIndex + direction + total) % total;
       updateSlider(type);
     }
@@ -107,7 +107,6 @@
     function updateSlider(type) {
       const currentIndex = sliders[type].currentIndex;
     
-      // classList.toggle 활용으로 코드 축약
       document.querySelectorAll(`#${type}-image-container .main-image`).forEach((img, index) => {
         img.classList.toggle('active', index === currentIndex);
       });
