@@ -8,6 +8,7 @@
 </head>
 <body>
 
+  <!-- 스타일 유지를 위해 클래스와 ID는 length, width로 고정 -->
   <div class="slider-container length-slider">
     <div class="slider-wrapper">
       <button class="arrow-button prev" onclick="changeImage('length', -1)">‹</button>
@@ -94,7 +95,6 @@
       const total = slider.images.length;
       if (!total) return;
     
-      // 나머지 연산을 활용한 간결한 인덱스 순환
       slider.currentIndex = (slider.currentIndex + direction + total) % total;
       updateSlider(type);
     }
@@ -107,7 +107,6 @@
     function updateSlider(type) {
       const currentIndex = sliders[type].currentIndex;
     
-      // classList.toggle 활용으로 코드 축약
       document.querySelectorAll(`#${type}-image-container .main-image`).forEach((img, index) => {
         img.classList.toggle('active', index === currentIndex);
       });
@@ -125,8 +124,9 @@
       window.parent.postMessage({ height: document.body.scrollHeight }, '*');
     }
     
-    function initSliderData(type) {
-      fetch(`https://iyusei02-lgtm.github.io/images/data/${type}.json`)
+    // type(클래스/변수명)과 fileName(데이터 경로명)을 분리해서 받도록 수정
+    function initSliderData(type, fileName) {
+      fetch(`https://iyusei02-lgtm.github.io/images/data/${fileName}.json`)
         .then(res => res.json())
         .then(imageUrls => {
           imageUrls.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
@@ -139,7 +139,9 @@
         });
     }
     
-    ['virtual_illustration_width', 'virtual_illustration_height'].forEach(initSliderData);
+    // UI 타입(width, length)에 맞게 각각 다른 JSON 파일을 맵핑하여 호출
+    initSliderData('width', 'virtual_illustration_width');
+    initSliderData('length', 'virtual_illustration_height');
     
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft') changeImage('width', -1);
