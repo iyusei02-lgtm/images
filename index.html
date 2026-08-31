@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Image Slider</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* height 슬라이더 메인 이미지 좌우 내부 여백 추가 */
+    #height-image-container {
+      padding: 0 50px;
+    }
+
+    @media (max-width: 768px) {
+      #height-image-container {
+        padding: 0 20px;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -31,7 +43,7 @@
   <script>
     const sliders = {
       width: { currentIndex: 0, images: [] },
-      height: { currentIndex: 0, images: [] } // length를 height로 수정
+      height: { currentIndex: 0, images: [] }
     };
     
     function createSlider(type, imageUrls) {
@@ -113,7 +125,6 @@
       document.querySelectorAll(`#${type}-thumbnails .thumbnail`).forEach((thumbnail, index) => {
         const isActive = index === currentIndex;
         thumbnail.classList.toggle('active', isActive);
-        // 스크롤 자동 이동(scrollIntoView) 로직 삭제
       });
     }
     
