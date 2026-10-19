@@ -3,8 +3,8 @@ name: Generate Image List and Optimize
 on:
   push:
     paths:
-      - 'img/width/**'
-      - 'img/height/**'
+      - 'img/illustration_width/**'
+      - 'img/illustration_height/**'
       - 'img/virtual_illustration_width/**'
       - 'img/virtual_illustration_height/**'
   workflow_dispatch:
@@ -28,7 +28,7 @@ jobs:
       - name: Optimize and convert images to WebP
         run: |
           # 가로 이미지 처리 (최대 폭 1200px)
-          for DIR in "img/width" "img/virtual_illustration_width"; do
+          for DIR in "img/illustration_width" "img/virtual_illustration_width"; do
             if [ -d "$DIR" ]; then
               find "$DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" \) | while read file; do
                 filename="${file%.*}"
@@ -40,7 +40,7 @@ jobs:
           done
           
           # 세로 이미지 처리 (최대 높이 1600px) - length를 height로 수정
-          for DIR in "img/height" "img/virtual_illustration_height"; do
+          for DIR in "img/illustration_height" "img/virtual_illustration_height"; do
             if [ -d "$DIR" ]; then
               find "$DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" \) | while read file; do
                 filename="${file%.*}"
@@ -53,16 +53,13 @@ jobs:
           
       - name: Generate JSON lists
         run: |
-          BASE_URL="https://iyusei02-lgtm.github.io/images"
-          
           mkdir -p data
           
-          for DIR in "img/width" "img/height" "img/virtual_illustration_width" "img/virtual_illustration_height"; do
+          for DIR in "img/illustration_width" "img/illustration_height" "img/virtual_illustration_width" "img/virtual_illustration_height"; do
             JSON_NAME="data/$(basename $DIR).json"
             
             if [ -d "$DIR" ]; then
               find "$DIR" -type f -iname "*.webp" | \
-              sed "s|^|${BASE_URL}/|" | \
               jq -R -s -c 'split("\n")[:-1]' > "$JSON_NAME"
             else
               echo "[]" > "$JSON_NAME"
